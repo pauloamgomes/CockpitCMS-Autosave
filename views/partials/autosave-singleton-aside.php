@@ -7,7 +7,6 @@
   this.isUpdating = false;
   this.autosaved = false;
   this.autosavetime = null;
-  this.debounceInterval = 0;
 
   this.on('mount', function() {
     $this.get();
