@@ -56,7 +56,10 @@
       var elements = App.$('cp-field[type=wysiwyg]');
       elements.each(function(key, el) {
         var id = App.$(el).find('textarea').first().attr('id');
-        tinyMCE.get(id).setContent(el.$getValue());
+        var content = el.$getValue();
+        if (content) {
+          tinyMCE.get(id).setContent(content);
+        }
       });
       $this.autosaved = null;
       $this.update();
