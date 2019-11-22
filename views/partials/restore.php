@@ -61,6 +61,7 @@
           tinyMCE.get(id).setContent(content);
         }
       });
+      App.callmodule('autosave:remove', $this.autosaved.id, 'access');
       $this.autosaved = null;
       $this.update();
       App.ui.notify('Autosaved resource restored with success', 'success');

@@ -5,7 +5,7 @@
   var $this = this;
   this.isReady = false;
   this.isUpdating = false;
-  this.autosaved = false;
+  this.autosaved = null;
   this.autosavetime = null;
 
   this.on('mount', function() {
@@ -14,10 +14,14 @@
     }
     this._entry = JSON.parse(JSON.stringify(this.entry));
     $this.isReady = true;
+    App.$(this.root).on('submit', function(e) {
+      $this.autosaved = false;
+      $this.autosavetime = null;
+    });
   });
 
   this.on('bindingupdated', function(data) {
-    if (this.isReady && this.entry['_id'] && !this.isUpdating && !_.isEqual(this.entry, this._entry)) {
+    if (this.isReady && this.entry['_id'] && !this.isUpdating) {
       window.setTimeout(this.autosave, 2000);
       $this.isUpdating = true;
       $this.update();
@@ -26,7 +30,11 @@
 
   this.get = function() {
     App.callmodule('autosave:get', this.entry._id, 'access').then(function(data) {
-      $this.autosaved = data.result || null;
+      if (data.result && data.result.data && data.result.data._modified !== $this.entry._modified) {
+        $this.autosaved = data.result;
+      } else {
+        $this.autosaved = null;
+      }
       $this.isUpdating = false;
       $this.update();
     }).catch(function(e){
@@ -35,7 +43,13 @@
   };
 
   this.autosave = function() {
-    App.callmodule('autosave:save',  {id: $this.entry._id, data: $this.entry }, 'access').then(function(data) {
+    var autosaveData = {
+       id: $this.entry._id,
+       data: $this.entry,
+       type: 'collection',
+       name: $this.collection._id
+    }
+    App.callmodule('autosave:save', autosaveData, 'access').then(function(data) {
       $this.autosavetime = data.result.updated || null;
       $this._entry = JSON.parse(JSON.stringify($this.entry));
       $this.isUpdating = false;

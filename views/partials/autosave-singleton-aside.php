@@ -12,10 +12,14 @@
     $this.get();
     $this._data = JSON.parse(JSON.stringify(this.data));
     $this.isReady = true;
+    App.$(this.root).on('submit', function(e) {
+      $this.autosaved = false;
+      $this.autosavetime = null;
+    });
   });
 
   this.on('bindingupdated', function(data) {
-    if (this.isReady && !this.isUpdating && !_.isEqual(this.data, this._data)) {
+    if (this.isReady && !this.isUpdating) {
       window.setTimeout(this.autosave, 2000);
       $this.isUpdating = true;
       $this.update();
@@ -23,7 +27,7 @@
   });
 
   this.get = function() {
-    App.callmodule('autosave:get', this.singleton._id, 'access').then(function(data) {
+   App.callmodule('autosave:get', this.singleton._id, 'access').then(function(data) {
       $this.autosaved = data.result || null;
       $this.isUpdating = false;
       $this.update();
@@ -33,7 +37,13 @@
   };
 
   this.autosave = function() {
-    App.callmodule('autosave:save', {id: $this.singleton._id, data: $this.data }, 'access').then(function(data) {
+    var autosaveData = {
+       id: $this.singleton._id,
+       data: $this.data,
+       type: 'singleton',
+       name: $this.singleton.name
+    }
+    App.callmodule('autosave:save', autosaveData, 'access').then(function(data) {
       $this.autosavetime = data.result.updated || null;
       $this._data = JSON.parse(JSON.stringify($this.data));
       $this.isUpdating = false;

@@ -15,7 +15,7 @@ $app->on('collections.save.after', function($name, $entry, $isUpdate) use ($app)
  */
 $app->on('singleton.saveData.after', function($singleton, $data) use($app) {
   $settings = $this->retrieve('config/autosave', ['singletons' => []]);
-  if ($settings['singletons'] === '*' || in_array($singleton, $settings['singletons'])) {
+  if ($settings['singletons'] === '*' || in_array($singleton['name'], $settings['singletons'])) {
     $app->module('autosave')->removeEntry($singleton['_id']);
   }
 });

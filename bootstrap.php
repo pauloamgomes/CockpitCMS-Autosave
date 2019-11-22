@@ -4,8 +4,18 @@ if (COCKPIT_ADMIN && !COCKPIT_API_REQUEST) {
   $this->module('autosave')->extend([
     'get' => function($id) {
       $data = $this->app->storage->findOne('cockpit/autosave', ['_oid' => $id]);
-      if (!$data) {
+      $type = $data['_type'] ?? NULL;
+      $resource = NULL;
+      if (!$data || !$data['_oid']) {
         return;
+      }
+
+      if ($type === 'collection') {
+        $resource = $this->app->storage->findOne("collections/{$data['_name']}", ['_id' => $data['_oid']]);
+        if (!$resource || $resource['_modified'] === $data['data']['_modified']) {
+          $this->app->storage->remove('cockpit/autosave', ['_oid' => $id]);
+          return;
+        }
       }
 
       $user = ['name' => 'N/A', 'email' => 'N/A', 'group' => 'N/A'];
@@ -26,14 +36,22 @@ if (COCKPIT_ADMIN && !COCKPIT_API_REQUEST) {
     'save' => function($autosaved) {
       $id = $autosaved['id'];
       $data = $autosaved['data'];
+      $type = $autosaved['type'];
+      $name = $autosaved['name'];
 
       $user = $this->app->module('cockpit')->getUser();
 
       $existing = $this->app->storage->findOne('cockpit/autosave', ['_oid' => $id]);
 
+      if ($type === 'collection') {
+        $data['_modified'] = time();
+      }
+
       $entry = [
         '_oid' => $id,
         'data' => $data,
+        '_type' => $type,
+        '_name' => $name,
         '_creator' => $user['_id'] ?? NULL,
         '_modified' => time()
       ];
