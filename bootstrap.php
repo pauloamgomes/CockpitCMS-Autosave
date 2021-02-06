@@ -1,4 +1,14 @@
 <?php
+/**
+ * Cockpit autosave editor addon
+ *
+ * @author  Paulo Gomes
+ * @package CockpitCMS-Autosave
+ * @license MIT
+ *
+ * @source  https://github.com/pauloamgomes/CockpitCMS-Autosave
+ * @see     { README.md } for usage info.
+ */
 
 if (COCKPIT_ADMIN && !COCKPIT_API_REQUEST) {
   $this->module('autosave')->extend([
@@ -87,4 +97,3 @@ if (COCKPIT_ADMIN && !COCKPIT_API_REQUEST) {
 if (COCKPIT_API_REQUEST) {
   include_once __DIR__ . '/actions.php';
 }
-
